@@ -1,0 +1,106 @@
+---
+title: "POST /auth/register — create a new user account"
+description: "POST /auth/register — register a new Mydva user with full name, email, password, and a profile photo. Returns the created user object on success."
+---
+
+The `/auth/register` endpoint creates a new user account on the Mydva platform. The request must be sent as `multipart/form-data` because registration requires a profile photo upload alongside the user's credentials. On success, the endpoint returns the newly created user object. If the email address is already associated with an existing account, the request is rejected with a 301 status.
+
+<Note>
+A profile photo file is required for registration. Requests without a file upload will fail.
+</Note>
+
+## Endpoint
+
+```
+POST http://localhost:5000/auth/register
+```
+
+**Content-Type:** `multipart/form-data`
+
+## Request fields
+
+<ParamField body="FullName" type="string" required>
+  The user's full display name (e.g. `"Priya Sharma"`).
+</ParamField>
+
+<ParamField body="email" type="string" required>
+  The user's email address. Must be unique — registration will fail if this email is already registered.
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  The user's chosen password. Stored as a hash; never returned in any response.
+</ParamField>
+
+<ParamField body="profile" type="file" required>
+  The user's profile photo. Sent as a multipart file upload field named `profile`. Accepted image formats depend on the server's Multer configuration; common formats (JPEG, PNG, WebP) are supported.
+</ParamField>
+
+## Example request
+
+```bash
+curl --request POST \
+  --url http://localhost:5000/auth/register \
+  --form "FullName=Priya Sharma" \
+  --form "email=priya@example.com" \
+  --form "password=SecurePass123" \
+  --form "profile=@/path/to/profile-photo.jpg"
+```
+
+## Response
+
+### 200 — user registered successfully
+
+```json
+{
+  "success": true,
+  "message": "User registered successfully",
+  "user": {
+    "_id": "64b3f1a2e4b0c12d3f5e6789",
+    "FullName": "Priya Sharma",
+    "email": "priya@example.com",
+    "profile": "1721123400000-.jpg",
+    "createdAt": "2024-07-16T10:30:00.000Z"
+  }
+}
+```
+
+<ResponseField name="success" type="boolean" required>
+  `true` when the account is created successfully.
+</ResponseField>
+
+<ResponseField name="message" type="string" required>
+  A human-readable confirmation message.
+</ResponseField>
+
+<ResponseField name="user" type="object" required>
+  The created user record. The exact fields returned depend on the Mongoose schema, but will include at minimum the user's ID, name, email, and profile image path. The password field is never included.
+</ResponseField>
+
+### 301 — email already registered
+
+```json
+{
+  "success": false,
+  "message": "User already exist please login"
+}
+```
+
+### 500 — internal server error
+
+```json
+{
+  "success": false,
+  "message": "Internal server error"
+}
+```
+
+## Error reference
+
+| Status | Message | Cause |
+|---|---|---|
+| `301` | `User already exist please login` | The provided email is already in use. |
+| `500` | `Internal server error` | An unexpected server-side error occurred (e.g. database failure). |
+
+<Tip>
+After a successful registration, redirect the user to the login page (`/auth/login`) to obtain a session token. The register endpoint does not issue a JWT.
+</Tip>

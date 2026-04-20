@@ -1,0 +1,76 @@
+---
+title: "Herbal remedy explorer with 3D herb models"
+description: "Browse Mydva's interactive 3D herb viewer to explore common Ayurvedic herbs, their traditional uses, properties, and preparation methods."
+---
+
+The herbal remedy section at `/dashboard/herbal-remedy` gives you an interactive way to explore the herbs that appear in Ayurvedic practice and in your personal consultation results. Each herb is presented with a three-dimensional model you can inspect alongside detailed information about its properties, traditional uses, and how to prepare and use it safely.
+
+## The 3D herb viewer
+
+The viewer is powered by the `HerbModel3D` component, which renders a fully interactive three-dimensional model of each herb.
+
+You can interact with the model in three ways:
+
+<Steps>
+  <Step title="Rotate">
+    Click and drag to rotate the model in any direction. This lets you examine the herb from different angles — root, stem, leaf, and flower.
+  </Step>
+  <Step title="Zoom">
+    Scroll or pinch to zoom in and out. Zooming in reveals finer details like leaf texture and surface features that are relevant to identification.
+  </Step>
+  <Step title="Inspect">
+    Hover over or tap highlighted regions on the model to surface annotations about that part of the plant — for example, whether the root, leaf, or seed is the therapeutically active portion.
+  </Step>
+</Steps>
+
+## Herb information panels
+
+Each herb entry in the explorer includes:
+
+<CardGroup cols={2}>
+  <Card title="Ayurvedic properties" icon="leaf">
+    Rasa (taste), virya (potency), vipaka (post-digestive effect), and which doshas the herb pacifies or aggravates.
+  </Card>
+  <Card title="Traditional uses" icon="book">
+    Classical Ayurvedic indications as described in texts such as the Charaka Samhita and Ashtanga Hridayam.
+  </Card>
+  <Card title="Preparation methods" icon="mortar-pestle">
+    Common forms — powder (churna), decoction (kashaya), oil (taila), or paste (lepa) — with basic preparation notes.
+  </Card>
+  <Card title="Dosage and timing" icon="clock">
+    General dosage ranges, timing relative to meals, and how dosage may vary by condition or constitution.
+  </Card>
+</CardGroup>
+
+<Note>
+Dosage and preparation details in the explorer reflect traditional Ayurvedic references. Your [personal consultation](/features/personal-consultation) provides dosage recommendations specifically calibrated to your dosha profile and health conditions, which may differ from general reference values.
+</Note>
+
+## Connection to your consultation plan
+
+When your personal consultation recommends specific herbs, each herb name in the results links directly to its entry in the herbal remedy explorer. This allows you to:
+
+- Examine the herb's 3D model before sourcing it
+- Review its Ayurvedic properties and understand why it was recommended for your profile
+- Check preparation instructions to ensure you are using it correctly
+
+This connection between the consultation output and the explorer is intentional — understanding what a herb is and how to use it is as important as knowing it was recommended.
+
+## Using herbal recommendations safely
+
+Ayurvedic herbs are potent and, in some cases, contraindicated with certain medications or conditions. Before starting any herbal remedy:
+
+<Warning>
+Always consult a qualified Ayurvedic practitioner before beginning any herbal regimen, especially if you are pregnant, nursing, managing a chronic illness, or taking prescription medications. Some herbs can interact with pharmaceutical drugs or have dose-dependent effects that require professional oversight.
+</Warning>
+
+<Tip>
+When visiting an Ayurvedic center or practitioner, bring your Mydva consultation results and the specific herbs listed in your plan. A practitioner can verify the recommendations are appropriate for your current state and advise on sourcing quality preparations.
+</Tip>
+
+General guidelines for safe use:
+
+- Source herbs from reputable suppliers with quality verification (organic certification or GMP compliance where available)
+- Start with the lower end of any dosage range and observe your body's response
+- Discontinue use and consult a practitioner if you experience any unexpected reaction
+- Do not self-escalate dosages beyond what is recommended in your consultation

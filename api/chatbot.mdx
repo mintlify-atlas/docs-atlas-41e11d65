@@ -1,0 +1,113 @@
+---
+title: "POST /predictu — Ayurvedic chatbot API"
+description: "POST /predictu — query Mydva's Gemini 1.5 Flash Ayurvedic assistant. Accepts a message string, returns an answer string. Covers /predictc too."
+---
+
+Mydva's chatbot service exposes two endpoints that send user messages to a Google Gemini 1.5 Flash model configured as an Ayurvedic domain expert. The assistant can answer questions about doshas, herbal remedies, dietary guidance, lifestyle adjustments, Panchakarma therapies, and general Ayurvedic philosophy. Both endpoints accept the same request shape and return the same response structure.
+
+The model runs with a temperature of `1` and a maximum output of `8192` tokens, allowing for detailed, conversational responses.
+
+## Endpoints
+
+| Endpoint | Audience |
+|---|---|
+| `POST /predictu` | User-facing chatbot (public wellness queries) |
+| `POST /predictc` | Company or admin chatbot (internal or support use) |
+
+Both endpoints share identical request and response formats. The distinction is in their intended audience and any system prompt context configured at the application level.
+
+## Base URL
+
+```
+http://localhost:5000
+```
+
+## Request body
+
+<ParamField body="message" type="string" required>
+  The user's message or question to send to the Ayurvedic assistant.
+</ParamField>
+
+## Example requests
+
+<CodeGroup>
+
+```bash /predictu
+curl --request POST \
+  --url http://localhost:5000/predictu \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "message": "What foods should I avoid if I have a Vata imbalance?"
+  }'
+```
+
+```bash /predictc
+curl --request POST \
+  --url http://localhost:5000/predictc \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "message": "Summarise the key principles of Panchakarma therapy."
+  }'
+```
+
+</CodeGroup>
+
+## Response
+
+### 200 — success
+
+```json
+{
+  "answer": "For a Vata imbalance, you should generally avoid cold, dry, and raw foods. This includes cold salads, crackers, dried fruits, carbonated drinks, and anything straight from the refrigerator. Vata is aggravated by the qualities of cold, light, dry, rough, and erratic — so foods that embody these qualities will worsen symptoms like bloating, anxiety, constipation, and insomnia. Instead, favour warm, cooked, oily, and well-spiced meals..."
+}
+```
+
+<ResponseField name="answer" type="string" required>
+  The AI-generated response from the Ayurvedic assistant. The length and detail of the answer will vary depending on the question and model output.
+</ResponseField>
+
+## Model details
+
+| Parameter | Value |
+|---|---|
+| Model | `gemini-1.5-flash` |
+| Provider | Google Generative AI |
+| Temperature | `1` |
+| Max output tokens | `8192` |
+
+<Note>
+The chatbot maintains a persistent `chat_session` on the server. This means messages within a single server process share conversational context. In a multi-user environment, this session is not isolated per user — consider this when designing conversation flows.
+</Note>
+
+## Error responses
+
+### 400 — missing message
+
+Returned when the request body does not include a `message` field.
+
+```json
+{
+  "error": "No message provided"
+}
+```
+
+### 500 — server error
+
+Returned when the Gemini API call fails or an unexpected error occurs on the server.
+
+```json
+{
+  "error": "An unexpected error occurred while processing your request."
+}
+```
+
+## Error reference
+
+| Status | Cause |
+|---|---|
+| `400` | `message` field is absent or empty in the request body. |
+| `500` | Gemini API failure, network error, or unhandled server exception. |
+
+<Tip>
+Keep messages concise and specific for best results. The assistant performs well on direct questions about Ayurvedic topics. For multi-turn conversations, phrase follow-up questions as self-contained queries in case session context is unavailable.
+</Tip>

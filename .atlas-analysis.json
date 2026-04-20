@@ -1,22 +1,11 @@
 {
-  "$schema": "https://mintlify.com/docs.json",
-  "name": "Mydva",
+  "projectType": "saas",
+  "projectName": "Mydva — Digital Vedic Ayurveda",
+  "projectDescription": "A full-stack Ayurvedic wellness platform that combines AI-powered dosha analysis, personalized health consultations, and educational content to deliver traditional Ayurvedic guidance through a modern digital experience.",
   "theme": "almond",
-  "colors": {
-    "primary": "#64defc"
-  },
-  "favicon": "https://media.brand.dev/78548c2b-392d-44af-b4e6-7a7962b9c014.png",
-  "navbar": {
-    "primary": {
-      "type": "github",
-      "href": "https://github.com/GaurRitika/DVA"
-    }
-  },
-  "footer": {
-    "socials": {
-      "github": "https://github.com/GaurRitika/DVA"
-    }
-  },
+  "primaryColor": "#64defc",
+  "lightColor": null,
+  "darkColor": null,
   "navigation": {
     "tabs": [
       {
@@ -93,5 +82,24 @@
         ]
       }
     ]
-  }
+  },
+  "keyFeatures": [
+    "Interactive dosha quiz to determine Vata, Pitta, and Kapha constitution percentages",
+    "AI-powered personalized Ayurvedic consultations via Groq LLaMA 3.3 70B",
+    "3D interactive herbal remedy models for common Ayurvedic herbs",
+    "Nearby Ayurvedic center discovery and information",
+    "Ayurveda education hub with articles and video content",
+    "AI chatbot assistant (Google Gemini) for real-time Ayurvedic guidance",
+    "User authentication with JWT and MongoDB",
+    "Protected dashboard with personalized health recommendations"
+  ],
+  "publicApiSurface": [
+    "POST /api/v1/analyze-dosha",
+    "GET /api/v1/recommendations/{dosha_type}",
+    "POST /api/v1/personal-consultation",
+    "POST /auth/register",
+    "POST /auth/login",
+    "POST /predictu",
+    "POST /predictc"
+  ]
 }

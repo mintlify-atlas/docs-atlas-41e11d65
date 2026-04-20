@@ -1,0 +1,253 @@
+---
+title: "POST /api/v1/personal-consultation"
+description: "POST /api/v1/personal-consultation — submit a health profile; receive an AI Ayurvedic plan covering diet, herbs, lifestyle, therapies, and warnings."
+---
+
+The `/api/v1/personal-consultation` endpoint accepts a detailed health profile and returns a comprehensive, AI-generated Ayurvedic consultation plan. The plan is tailored to the user's age, weight, medical history, lifestyle habits, and stated health concerns. It covers dietary adjustments, lifestyle practices, herbal recommendations, therapeutic treatments, exercise guidance, and relevant medical warnings.
+
+<Note>
+This endpoint calls the GROQ LLM API internally. A valid `GROQ_API_KEY` must be set in the server environment before requests to this endpoint will succeed.
+</Note>
+
+## Endpoint
+
+```
+POST http://localhost:8000/api/v1/personal-consultation
+```
+
+## Request body
+
+<ParamField body="personal_info" type="object" required>
+  Basic physical and demographic information about the user.
+
+  <Expandable title="personal_info properties">
+    <ParamField body="personal_info.age" type="integer" required placeholder="1–120">
+      User's age in years. Must be between `1` and `120`.
+    </ParamField>
+
+    <ParamField body="personal_info.gender" type="string" required>
+      User's gender. Accepted values: `"male"`, `"female"`, `"other"`.
+    </ParamField>
+
+    <ParamField body="personal_info.weight" type="number" required placeholder="20–200">
+      User's weight in kilograms. Must be between `20` and `200`.
+    </ParamField>
+
+    <ParamField body="personal_info.height" type="number" required placeholder="100–250">
+      User's height in centimetres. Must be between `100` and `250`.
+    </ParamField>
+
+    <ParamField body="personal_info.bmi" type="number" required>
+      Body Mass Index. Calculate as `weight (kg) / height (m)²`. The client is responsible for computing and supplying this value.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="medical_history" type="object" required>
+  Existing health conditions and current medications.
+
+  <Expandable title="medical_history properties">
+    <ParamField body="medical_history.conditions" type="string[]" required>
+      A list of diagnosed medical conditions (e.g. `["Diabetes", "Hypertension"]`). Pass an empty array if none apply.
+    </ParamField>
+
+    <ParamField body="medical_history.medications" type="string | null">
+      A free-text description of current medications. Pass `null` or omit if not applicable.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="lifestyle" type="object" required>
+  Daily habits and activity patterns.
+
+  <Expandable title="lifestyle properties">
+    <ParamField body="lifestyle.diet_type" type="string" required>
+      The user's current diet (e.g. `"vegetarian"`, `"vegan"`, `"omnivore"`, `"gluten-free"`).
+    </ParamField>
+
+    <ParamField body="lifestyle.physical_activity" type="string" required>
+      Description of the user's exercise habits (e.g. `"sedentary"`, `"lightly active"`, `"moderately active"`, `"highly active"`).
+    </ParamField>
+
+    <ParamField body="lifestyle.sleep_hours" type="integer" required placeholder="4–12">
+      Average number of hours of sleep per night. Must be between `4` and `12`.
+    </ParamField>
+
+    <ParamField body="lifestyle.stress_level" type="string" required>
+      Self-reported stress level. Accepted values: `"low"`, `"medium"`, `"high"`.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="concerns" type="object" required>
+  The user's primary health goals and treatment history.
+
+  <Expandable title="concerns properties">
+    <ParamField body="concerns.primary_concerns" type="string" required>
+      A free-text description of the user's main health complaints or wellness goals.
+    </ParamField>
+
+    <ParamField body="concerns.previous_treatments" type="string | null">
+      A description of any prior treatments tried. Pass `null` or omit if not applicable.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+## Example request
+
+```bash
+curl --request POST \
+  --url http://localhost:8000/api/v1/personal-consultation \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "personal_info": {
+      "age": 34,
+      "gender": "female",
+      "weight": 62.5,
+      "height": 165.0,
+      "bmi": 22.9
+    },
+    "medical_history": {
+      "conditions": ["Irritable Bowel Syndrome"],
+      "medications": null
+    },
+    "lifestyle": {
+      "diet_type": "vegetarian",
+      "physical_activity": "lightly active",
+      "sleep_hours": 6,
+      "stress_level": "high"
+    },
+    "concerns": {
+      "primary_concerns": "Chronic bloating, low energy, and difficulty sleeping.",
+      "previous_treatments": "Tried probiotics and dietary changes with limited success."
+    }
+  }'
+```
+
+## Response
+
+### 200 — success
+
+<ResponseField name="status" type="string" required>
+  Always `"success"` when the consultation is generated without error.
+</ResponseField>
+
+<ResponseField name="data" type="object" required>
+  The full consultation plan.
+
+  <Expandable title="data properties" defaultOpen>
+    <ResponseField name="recommendations" type="object" required>
+      Structured Ayurvedic guidance across six categories.
+
+      <Expandable title="recommendations properties" defaultOpen>
+        <ResponseField name="overview" type="object" required>
+          High-level analysis of the health profile.
+
+          <Expandable title="overview properties">
+            <ResponseField name="condition_analysis" type="string[]" required>
+              Analysis of the user's reported conditions and how they relate to dosha imbalance.
+            </ResponseField>
+
+            <ResponseField name="dosha_impact" type="string[]" required>
+              Assessment of how the user's lifestyle and history are affecting their doshas.
+            </ResponseField>
+          </Expandable>
+        </ResponseField>
+
+        <ResponseField name="dietary" type="string[]" required>
+          Specific food and nutrition recommendations.
+        </ResponseField>
+
+        <ResponseField name="lifestyle" type="string[]" required>
+          Daily routine adjustments and behavioural recommendations.
+        </ResponseField>
+
+        <ResponseField name="herbal" type="string[]" required>
+          Ayurvedic herbs and formulations suited to the user's profile.
+        </ResponseField>
+
+        <ResponseField name="therapeutic" type="string[]" required>
+          Ayurvedic therapies and body treatments.
+        </ResponseField>
+
+        <ResponseField name="exercise" type="string[]" required>
+          Exercise types and intensity appropriate for the user's constitution and condition.
+        </ResponseField>
+
+        <ResponseField name="warnings" type="string[]" required>
+          Important cautions regarding interactions with existing conditions or medications. May be an empty array.
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="error" type="null">
+  Always `null` on a successful response.
+</ResponseField>
+
+### Example response
+
+```json
+{
+  "status": "success",
+  "data": {
+    "recommendations": {
+      "overview": {
+        "condition_analysis": [
+          "IBS is strongly linked to Vata imbalance in the colon.",
+          "High stress and irregular sleep compound Vata aggravation."
+        ],
+        "dosha_impact": [
+          "Elevated Vata is disrupting digestive motility and nervous system stability.",
+          "Low Kapha may be contributing to insufficient tissue nourishment."
+        ]
+      },
+      "dietary": [
+        "Eat warm, cooked, easily digestible meals at regular times.",
+        "Favour rice, moong dal, and cooked vegetables.",
+        "Avoid raw salads, cold drinks, and carbonated beverages.",
+        "Include digestive spices: cumin, fennel, ginger, and asafoetida."
+      ],
+      "lifestyle": [
+        "Establish a consistent sleep schedule aiming for 7–8 hours.",
+        "Practice 10 minutes of slow diaphragmatic breathing before bed.",
+        "Reduce multitasking and create dedicated periods of rest."
+      ],
+      "herbal": [
+        "Triphala (before bed) to regulate bowel function.",
+        "Ashwagandha (morning) to counter stress and fatigue.",
+        "Shatavari to support the nervous system and gut lining."
+      ],
+      "therapeutic": [
+        "Abhyanga (warm sesame oil self-massage) three times per week.",
+        "Basti (medicated enema) under practitioner guidance for IBS management."
+      ],
+      "exercise": [
+        "Restorative yoga with focus on twists to support digestion.",
+        "Evening walks of 20–30 minutes to reduce stress.",
+        "Avoid vigorous or high-intensity exercise until Vata is stable."
+      ],
+      "warnings": [
+        "Consult a gastroenterologist before starting Basti therapy.",
+        "Monitor for changes in IBS symptoms when introducing new herbs."
+      ]
+    }
+  },
+  "error": null
+}
+```
+
+### Error — missing API key
+
+```json
+{
+  "status": "error",
+  "data": null,
+  "error": "GROQ_API_KEY is not configured. Personal consultation is unavailable."
+}
+```
+
+<Warning>
+The consultation output is AI-generated and intended for informational purposes only. It is not a substitute for professional medical advice. Always advise users to consult a qualified healthcare practitioner before changing their diet, starting herbal supplements, or undergoing therapeutic treatments.
+</Warning>

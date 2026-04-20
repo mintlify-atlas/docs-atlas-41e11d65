@@ -1,0 +1,140 @@
+---
+title: "POST /auth/login — sign in to Mydva"
+description: "POST /auth/login — authenticate a user with email and password. Returns a JWT token and sets an HTTP-only session cookie valid for 3 days."
+---
+
+The `/auth/login` endpoint authenticates an existing user with their email address and password. On success, a signed JWT is issued both as an HTTP-only cookie named `token` and in the response body. The cookie approach is suitable for browser-based clients; the body token is available for mobile or API clients that manage tokens manually. The token expires after 3 days.
+
+## Endpoint
+
+```
+POST http://localhost:5000/auth/login
+```
+
+**Content-Type:** `application/json`
+
+## Request body
+
+<ParamField body="email" type="string" required>
+  The registered email address for the account.
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  The account password.
+</ParamField>
+
+## Example request
+
+```bash
+curl --request POST \
+  --url http://localhost:5000/auth/login \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "email": "priya@example.com",
+    "password": "SecurePass123"
+  }'
+```
+
+## Response
+
+### 200 — login successful
+
+```json
+{
+  "success": true,
+  "message": "Login successfully",
+  "user": {
+    "_id": "64b3f1a2e4b0c12d3f5e6789",
+    "FullName": "Priya Sharma",
+    "email": "priya@example.com",
+    "profile": "1721123400000-.jpg"
+  },
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+<ResponseField name="success" type="boolean" required>
+  `true` on a successful login.
+</ResponseField>
+
+<ResponseField name="message" type="string" required>
+  A human-readable confirmation message.
+</ResponseField>
+
+<ResponseField name="user" type="object" required>
+  The authenticated user's profile. The password field is never included.
+</ResponseField>
+
+<ResponseField name="token" type="string" required>
+  A signed JWT for use by API clients that do not rely on cookies. Include this as a `Bearer` token in the `Authorization` header for subsequent authenticated requests if not relying on the cookie.
+</ResponseField>
+
+### Session cookie
+
+In addition to the response body, a cookie is set on the response:
+
+| Attribute | Value |
+|---|---|
+| Name | `token` |
+| Value | Signed JWT string |
+| `HttpOnly` | `true` — not accessible via JavaScript |
+| Expiry | 3 days from issue time |
+
+Browser-based clients will send this cookie automatically on subsequent requests to the same origin. No manual token management is required.
+
+## Error responses
+
+### 400 — missing fields
+
+Returned when either `email` or `password` is absent from the request body.
+
+```json
+{
+  "success": false,
+  "message": "All Fields are required"
+}
+```
+
+### 400 — user not found
+
+Returned when no account exists for the provided email address.
+
+```json
+{
+  "success": false,
+  "message": "No user found in our database, please register"
+}
+```
+
+### 400 — invalid password
+
+Returned when the email matches an existing account but the password is incorrect.
+
+```json
+{
+  "success": false,
+  "message": "Invalid Password"
+}
+```
+
+### 500 — internal server error
+
+```json
+{
+  "success": false,
+  "message": "Internal server error"
+}
+```
+
+## Error reference
+
+| Status | Message | Cause |
+|---|---|---|
+| `400` | `All Fields are required` | `email` or `password` missing from request body. |
+| `400` | `No user found in our database, please register` | Email not registered. |
+| `400` | `Invalid Password` | Password does not match the stored hash. |
+| `500` | `Internal server error` | Unexpected server-side error. |
+
+<Warning>
+Do not log or store the raw JWT token in `localStorage` in browser environments. Use the HTTP-only cookie mechanism instead, as it is not accessible to JavaScript and reduces XSS risk.
+</Warning>

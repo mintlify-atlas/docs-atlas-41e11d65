@@ -1,0 +1,190 @@
+---
+title: "Troubleshoot common Mydva setup issues"
+description: "Resolve the most common Mydva setup problems: Python module errors, Groq API failures, MongoDB connection issues, CORS errors, and port 5000 conflicts."
+---
+
+This page covers the errors most commonly encountered when setting up or running Mydva for the first time. Each section describes the symptom, explains the underlying cause, and gives concrete steps to resolve it.
+
+<AccordionGroup>
+  <Accordion title="Module import errors (Python)">
+    **Symptom:** Running a Python service produces an error like `ModuleNotFoundError: No module named 'fastapi'` or `ImportError: cannot import name ...`.
+
+    **Cause:** Either the virtual environment is not activated, the dependencies have not been installed, or you are running the command from the wrong directory.
+
+    **Resolution:**
+
+    1. Activate the virtual environment from the `DVA/` root:
+
+    <CodeGroup>
+
+    ```bash Linux / macOS
+    source venv/bin/activate
+    ```
+
+    ```bash Windows
+    venv\Scripts\activate
+    ```
+
+    </CodeGroup>
+
+    2. Confirm the environment is active — your terminal prompt should show `(venv)`.
+
+    3. Install all dependencies:
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+    4. Confirm you are running commands from the correct directory. The FastAPI backend must be started from `DVA/backend/`, and the Flask chatbot from `DVA/mybackend/final_bot/`.
+
+    <Note>
+    You must activate the virtual environment in every new terminal session. It does not persist between sessions automatically.
+    </Note>
+  </Accordion>
+
+  <Accordion title="API connection issues (Groq)">
+    **Symptom:** The consultation endpoint returns an error, logs show `401 Unauthorized` or `Connection refused` when calling the Groq API, or users receive only default (non-personalized) recommendations.
+
+    **Cause:** The `GROQ_API_KEY` environment variable is missing, set to a placeholder value, or the key has been revoked. Less commonly, the machine has no internet access.
+
+    **Resolution:**
+
+    1. Verify the key is set in `DVA/.env`:
+
+    ```bash
+    cat DVA/.env | grep GROQ_API_KEY
+    ```
+
+    The output should show a real key value, not `your_groq_api_key_here`.
+
+    2. If the key is missing, follow the [Groq API setup guide](/configuration/groq-api) to generate a new key.
+
+    3. Confirm the FastAPI backend is running and listening on port 8000:
+
+    ```bash
+    curl http://localhost:8000/docs
+    ```
+
+    4. Check that the server has internet access by pinging the Groq API host:
+
+    ```bash
+    curl -I https://api.groq.com
+    ```
+
+    5. Re-run the verification script after updating the key:
+
+    ```bash
+    python scripts/verify_api_key.py
+    ```
+  </Accordion>
+
+  <Accordion title="Frontend cannot reach the backend">
+    **Symptom:** The React app loads but API calls fail with network errors, `ERR_CONNECTION_REFUSED`, or `CORS` errors in the browser console.
+
+    **Cause:** The most common causes are `REACT_APP_API_BASE_URL` pointing to the wrong host or port, the FastAPI backend not running, a firewall blocking port 8000, or a CORS misconfiguration in the backend.
+
+    **Resolution:**
+
+    1. Confirm the FastAPI backend is running on port 8000:
+
+    ```bash
+    curl http://localhost:8000/api/v1
+    ```
+
+    2. Check the value of `REACT_APP_API_BASE_URL` in `DVA/.env`:
+
+    ```env
+    REACT_APP_API_BASE_URL=http://localhost:8000/api/v1
+    ```
+
+    For deployments where the frontend and backend run on different hosts, replace `localhost` with the backend's IP address or hostname.
+
+    3. After changing `REACT_APP_API_BASE_URL`, restart the React development server — React embeds this value at build time and changes are not picked up without a restart.
+
+    4. If you see CORS errors, confirm the FastAPI backend has the correct `allow_origins` configuration for the frontend's URL.
+
+    5. Check that no firewall rule is blocking port 8000 on the server.
+  </Accordion>
+
+  <Accordion title="MongoDB connection failed">
+    **Symptom:** The Express auth server exits immediately or logs an error like `MongoServerSelectionError`, `Authentication failed`, or `connection timed out`.
+
+    **Cause:** The `MONGO_URI` is incorrect, the database user credentials are wrong, or MongoDB Atlas has not been configured to allow connections from your IP address.
+
+    **Resolution:**
+
+    1. Verify `MONGO_URI` is set in `DVA/mybackend/.env`:
+
+    ```bash
+    cat mybackend/.env | grep MONGO_URI
+    ```
+
+    2. Confirm the URI follows the correct format:
+
+    ```
+    mongodb+srv://username:password@cluster.mongodb.net/dbname
+    ```
+
+    Ensure the username and password in the URI match the database user created in Atlas, not your Atlas account login.
+
+    3. In the [MongoDB Atlas dashboard](https://atlas.mongodb.com), go to **Network Access** and confirm your current IP address is in the Access List. If you are unsure of your IP, temporarily add `0.0.0.0/0` to test connectivity, then restrict it afterward.
+
+    4. If using a local MongoDB instance, confirm the `mongod` process is running:
+
+    ```bash
+    systemctl status mongod
+    ```
+  </Accordion>
+
+  <Accordion title="Port 5000 conflict between chatbot and auth server">
+    **Symptom:** Either the Flask chatbot or the Express auth server fails to start with `Address already in use` or `EADDRINUSE 5000`.
+
+    **Cause:** Both the Flask chatbot (`final_bot/main.py`) and the Express auth server default to port `5000`. Only one process can bind to a given port at a time.
+
+    **Resolution:**
+
+    Choose one of the following approaches:
+
+    **Option 1 — Change the auth server port:**
+
+    Edit `DVA/mybackend/.env` and set `PORT` to an available port:
+
+    ```env
+    PORT=5001
+    ```
+
+    Restart the auth server. Update any frontend code that references port `5000` for auth endpoints.
+
+    **Option 2 — Change the Flask chatbot port:**
+
+    In `final_bot/main.py`, update the `app.run()` call to use a different port:
+
+    ```python
+    app.run(port=5002)
+    ```
+
+    Or set the `FLASK_RUN_PORT` environment variable before starting:
+
+    ```bash
+    FLASK_RUN_PORT=5002 python main.py
+    ```
+
+    <Tip>
+    Use `lsof -i :5000` on Linux/macOS or `netstat -ano | findstr :5000` on Windows to identify which process is currently using port 5000.
+    </Tip>
+  </Accordion>
+
+  <Accordion title="Registration fails with 'No file uploaded'">
+    **Symptom:** Attempting to register a new account returns an error message containing "No file uploaded" or the registration form submission fails.
+
+    **Cause:** Mydva's registration endpoint requires a profile photo to be uploaded as part of the registration form. The field cannot be left empty.
+
+    **Resolution:**
+
+    1. Ensure you are selecting a profile image file in the registration form before submitting. The image upload field is required, not optional.
+
+    2. If you are calling the registration API directly (for example, from a script or API client), include the image as a `multipart/form-data` field named `profile` (the exact field name the server expects).
+
+    3. Confirm the `Content-Type` header of your request is `multipart/form-data` and not `application/json` — the auth server uses Multer (Node.js) to handle file uploads and will reject requests that do not include a file part.
+  </Accordion>
+</AccordionGroup>

@@ -1,0 +1,85 @@
+---
+title: "Environment variables reference for Mydva"
+description: "Complete reference for all environment variables required to run Mydva, including Groq API keys, MongoDB URIs, JWT secrets, and frontend API URLs."
+---
+
+Mydva requires two separate `.env` files to run: one in the project root (`DVA/`) that configures the AI backend and frontend API URL, and one inside `mybackend/` that configures the Express authentication server. Neither file is committed to version control — you create them manually on each machine or deployment environment.
+
+<Warning>
+Never commit `.env` files to version control. Add both `/.env` and `/mybackend/.env` to your `.gitignore` before your first commit to prevent accidentally exposing secrets.
+</Warning>
+
+## Root `.env` (`DVA/.env`)
+
+This file is read by the FastAPI backend and the React frontend build process. Place it in the root of the `DVA/` folder, at the same level as `requirements.txt`.
+
+| Variable | Description | Example | Required |
+|---|---|---|---|
+| `GROQ_API_KEY` | API key for the Groq inference service, used by the consultation recommendation engine | `gsk_abc123...` | Yes |
+| `REACT_APP_API_BASE_URL` | Base URL the React frontend uses to reach the FastAPI backend | `http://localhost:8000/api/v1` | Yes |
+
+```env
+GROQ_API_KEY=your_groq_api_key_here
+REACT_APP_API_BASE_URL=http://localhost:8000/api/v1
+```
+
+<Note>
+`REACT_APP_API_BASE_URL` must be set before running `npm start` or `npm run build` in the React frontend. React embeds environment variables at build time, so changes require a restart of the development server.
+</Note>
+
+## Auth server `.env` (`DVA/mybackend/.env`)
+
+This file is read by the Express.js authentication backend. Place it inside the `mybackend/` directory.
+
+| Variable | Description | Example | Required |
+|---|---|---|---|
+| `MONGO_URI` | MongoDB connection string for storing user accounts and authentication data | `mongodb+srv://user:pass@cluster.mongodb.net/mydva` | Yes |
+| `PORT` | Port the Express auth server listens on | `5000` | Yes |
+| `JWT_SECRET` | Secret key used to sign and verify JSON Web Tokens | `a-long-random-string` | Yes |
+
+```env
+MONGO_URI=your_mongodb_connection_string
+PORT=5000
+JWT_SECRET=your_jwt_secret
+```
+
+## Creating the files
+
+<Steps>
+  <Step title="Create the root .env">
+    In the `DVA/` directory, create a file named `.env` and paste the following, replacing placeholder values with your real credentials:
+
+    ```env
+    GROQ_API_KEY=your_groq_api_key_here
+    REACT_APP_API_BASE_URL=http://localhost:8000/api/v1
+    ```
+  </Step>
+  <Step title="Create the mybackend .env">
+    In the `DVA/mybackend/` directory, create a file named `.env` and paste the following:
+
+    ```env
+    MONGO_URI=your_mongodb_connection_string
+    PORT=5000
+    JWT_SECRET=your_jwt_secret
+    ```
+  </Step>
+  <Step title="Verify .gitignore">
+    Confirm that your `.gitignore` includes entries for both files:
+
+    ```bash
+    grep ".env" .gitignore
+    ```
+
+    If no output appears, add the following lines to `.gitignore`:
+
+    ```
+    .env
+    mybackend/.env
+    ```
+  </Step>
+</Steps>
+
+## Related configuration
+
+- [Groq API setup](/configuration/groq-api) — how to obtain your `GROQ_API_KEY` and what it enables
+- [MongoDB setup](/configuration/mongodb) — how to create a `MONGO_URI` and configure your database

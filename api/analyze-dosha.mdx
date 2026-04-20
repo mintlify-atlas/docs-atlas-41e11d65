@@ -1,0 +1,144 @@
+---
+title: "POST /api/v1/analyze-dosha"
+description: "POST /api/v1/analyze-dosha — submit dosha quiz responses and receive Vata, Pitta, and Kapha percentages plus a primary and secondary dosha classification."
+---
+
+The `/api/v1/analyze-dosha` endpoint processes a user's quiz responses and calculates their Ayurvedic dosha constitution. You submit a map of named characteristics, each scored for Vata, Pitta, and Kapha tendencies. The engine aggregates the scores and returns a primary dosha, an optional secondary dosha, the percentage breakdown across all three doshas, and a list of personalised recommendations.
+
+## Endpoint
+
+```
+POST http://localhost:8000/api/v1/analyze-dosha
+```
+
+## Request body
+
+The request body is a JSON object where each key is a characteristic identifier (e.g. `"body_frame"`, `"skin_type"`) and each value is a `DoshaCharacteristic` object.
+
+<ParamField body="<characteristic_key>" type="object" required>
+  A named characteristic from the dosha quiz. The key is a free-form string identifier. The value is a `DoshaCharacteristic` object.
+
+  <Expandable title="DoshaCharacteristic properties">
+    <ParamField body="trait_name" type="string" required>
+      The name of the physical or behavioural trait being assessed (e.g. `"body_frame"`, `"skin_type"`, `"appetite"`).
+    </ParamField>
+
+    <ParamField body="vata_score" type="integer" required>
+      The degree to which this trait aligns with Vata qualities. Must be `0` or greater.
+    </ParamField>
+
+    <ParamField body="pitta_score" type="integer" required>
+      The degree to which this trait aligns with Pitta qualities. Must be `0` or greater.
+    </ParamField>
+
+    <ParamField body="kapha_score" type="integer" required>
+      The degree to which this trait aligns with Kapha qualities. Must be `0` or greater.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+## Example request
+
+```bash
+curl --request POST \
+  --url http://localhost:8000/api/v1/analyze-dosha \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "body_frame": {
+      "trait_name": "body_frame",
+      "vata_score": 3,
+      "pitta_score": 1,
+      "kapha_score": 0
+    },
+    "skin_type": {
+      "trait_name": "skin_type",
+      "vata_score": 2,
+      "pitta_score": 3,
+      "kapha_score": 0
+    },
+    "appetite": {
+      "trait_name": "appetite",
+      "vata_score": 1,
+      "pitta_score": 3,
+      "kapha_score": 1
+    }
+  }'
+```
+
+## Response
+
+### 200 — success
+
+<ResponseField name="status" type="string" required>
+  Always `"success"` when the request is processed without error.
+</ResponseField>
+
+<ResponseField name="data" type="object" required>
+  The computed dosha profile and recommendations.
+
+  <Expandable title="data properties">
+    <ResponseField name="primary_dosha" type="string" required>
+      The dominant dosha for this user. One of `"vata"`, `"pitta"`, or `"kapha"`.
+    </ResponseField>
+
+    <ResponseField name="secondary_dosha" type="string | null" required>
+      The secondary dosha if a clear second tendency is present, otherwise `null`.
+    </ResponseField>
+
+    <ResponseField name="vata_percentage" type="number" required>
+      Percentage of Vata energy in the constitution. Value between `0` and `100`.
+    </ResponseField>
+
+    <ResponseField name="pitta_percentage" type="number" required>
+      Percentage of Pitta energy in the constitution. Value between `0` and `100`.
+    </ResponseField>
+
+    <ResponseField name="kapha_percentage" type="number" required>
+      Percentage of Kapha energy in the constitution. Value between `0` and `100`.
+    </ResponseField>
+
+    <ResponseField name="recommendations" type="string[]" required>
+      A list of Ayurvedic recommendations tailored to the computed dosha profile.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="error" type="null">
+  Always `null` on a successful response.
+</ResponseField>
+
+### Example response
+
+```json
+{
+  "status": "success",
+  "data": {
+    "primary_dosha": "vata",
+    "secondary_dosha": "pitta",
+    "vata_percentage": 60.0,
+    "pitta_percentage": 25.0,
+    "kapha_percentage": 15.0,
+    "recommendations": [
+      "Favour warm, oily, and grounding foods.",
+      "Establish a regular daily routine to calm Vata.",
+      "Avoid cold, dry, and raw foods.",
+      "Practice gentle yoga and meditation to reduce anxiety."
+    ]
+  },
+  "error": null
+}
+```
+
+### Error response
+
+```json
+{
+  "status": "error",
+  "data": null,
+  "error": "Invalid score value: scores must be non-negative integers."
+}
+```
+
+<Tip>
+Submit at least five or more characteristics to get a statistically meaningful dosha breakdown. A single characteristic is valid but will produce a less accurate result.
+</Tip>

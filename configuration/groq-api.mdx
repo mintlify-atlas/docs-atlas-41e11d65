@@ -1,0 +1,72 @@
+---
+title: "Connect Mydva to the Groq API for AI consultations"
+description: "Set up your Groq API key to enable Mydva's AI-powered consultation engine, which uses LLaMA 3.3 70B to generate personalized Ayurvedic recommendations."
+---
+
+Mydva's consultation feature uses the Groq inference API to generate personalized Ayurvedic recommendations based on a user's dosha profile and reported symptoms. Without a valid Groq API key, the consultation engine falls back to a set of static default recommendations and will not produce personalized output.
+
+## What Groq powers in Mydva
+
+The Groq API is called by `backend/app/services/consultation_service.py` whenever a user requests an Ayurvedic consultation. It powers:
+
+- **Dosha-based recommendations** — the engine sends a structured prompt containing the user's dosha assessment results and receives tailored dietary, lifestyle, and herbal suggestions.
+- **Consultation responses** — all AI-generated text in the consultation flow is produced by the model running on Groq's infrastructure.
+
+The service sends requests directly to `https://api.groq.com/openai/v1/chat/completions` using the model `llama-3.3-70b-versatile` at a temperature of `0.3`, which keeps responses focused and consistent while allowing some natural variation.
+
+## Get a Groq API key
+
+<Steps>
+  <Step title="Go to the Groq console">
+    Open [console.groq.com](https://console.groq.com) in your browser.
+  </Step>
+  <Step title="Create an account">
+    Sign up with your email address or log in if you already have an account. Groq offers a free tier that is sufficient for development and testing.
+  </Step>
+  <Step title="Generate an API key">
+    In the console, navigate to **API Keys** and click **Create API Key**. Give it a descriptive name (for example, `mydva-dev`) and copy the key — it will only be shown once.
+  </Step>
+</Steps>
+
+## Add the key to your environment
+
+Open or create the file `DVA/.env` in the root of the project and set `GROQ_API_KEY`:
+
+```env
+GROQ_API_KEY=gsk_your_actual_key_here
+REACT_APP_API_BASE_URL=http://localhost:8000/api/v1
+```
+
+<Warning>
+Do not paste your API key anywhere in source code or commit it to version control. The `.env` file must be listed in `.gitignore`.
+</Warning>
+
+## Model configuration
+
+The consultation service is configured with the following parameters:
+
+| Parameter | Value | Notes |
+|---|---|---|
+| Model | `llama-3.3-70b-versatile` | LLaMA 3.3 70B hosted on Groq |
+| Temperature | `0.3` | Low temperature for consistent, clinically-toned output |
+| Endpoint | `https://api.groq.com/openai/v1/chat/completions` | OpenAI-compatible chat completions API |
+
+These values are set in `backend/app/services/consultation_service.py`. To adjust the model or temperature, edit that file directly.
+
+## Verify the key is working
+
+After setting the key, run the verification script from the `DVA/` root directory:
+
+```bash
+python scripts/verify_api_key.py
+```
+
+A successful response confirms the key is valid and the Groq service is reachable. If the script reports an error, check the troubleshooting steps below.
+
+## What happens if the key is missing or invalid
+
+If `GROQ_API_KEY` is not set or the key is rejected by Groq, the consultation service falls back to a set of default Ayurvedic recommendations. Users will still see a response, but it will not be personalized to their dosha profile or symptom input. An error will also be logged in the FastAPI backend output.
+
+<Tip>
+If you're running Mydva in a staging or CI environment where you don't need AI output, you can intentionally omit the key to exercise the fallback behavior without consuming API quota.
+</Tip>

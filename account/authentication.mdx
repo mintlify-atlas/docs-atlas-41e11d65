@@ -1,0 +1,64 @@
+---
+title: "Sign in to Mydva and manage your session"
+description: "Learn how Mydva authenticates users with JWT tokens stored in secure HTTP-only cookies, and how sessions are maintained across visits."
+---
+
+Mydva uses secure, cookie-based sessions to keep you signed in between visits. Once you sign in with your email and password, your session lasts for 3 days before you need to authenticate again. This page explains how to sign in, what to expect during and after authentication, and how sessions behave over time.
+
+## Signing in
+
+Navigate to `/login` to access the sign-in page. Enter the email address and password you used when creating your account, then click **Login**.
+
+<Steps>
+  <Step title="Go to the login page">
+    Open Mydva and navigate to `/login`. You are also redirected here automatically when trying to access any protected page without an active session.
+  </Step>
+  <Step title="Enter your credentials">
+    Type your registered email address and your password into the respective fields.
+  </Step>
+  <Step title="Click Login">
+    Submit the form. If your credentials are correct, your session is established and you are redirected to your dashboard.
+  </Step>
+</Steps>
+
+## What happens after a successful login
+
+When you sign in successfully, Mydva:
+
+1. Establishes a secure session tied to your account
+2. Redirects you to your dashboard at `/dashboard/`
+3. Keeps you signed in for up to **3 days (72 hours)** without requiring you to enter your credentials again
+
+As long as your session is active, you can close and reopen the browser and remain signed in.
+
+## Session duration
+
+Your session remains active for 3 days from the time you sign in. After 72 hours, your session expires automatically and you are returned to the login page on your next visit.
+
+<Info>
+  There is no "remember me" option — all sessions follow the same 3-day duration. To continue using Mydva after your session expires, simply sign in again.
+</Info>
+
+## Signing out
+
+To end your session before the 3-day period is up, use the sign-out option available in the dashboard navigation. Signing out immediately invalidates your session and returns you to the login page.
+
+## When your session expires
+
+If your session has expired and you try to access any dashboard page, you are automatically redirected to `/login`. Your account and all saved data remain intact — sign in again to pick up where you left off.
+
+## Error states
+
+If your sign-in attempt does not succeed, Mydva displays one of the following messages:
+
+| Error | What it means | What to do |
+|---|---|---|
+| All fields are required | One or both fields were left blank | Enter both your email and password before submitting |
+| User not found | No account exists with that email address | Check for a typo or [create a new account](/account/registration) |
+| Invalid password | The password does not match the account | Re-enter your password carefully; use your password manager if needed |
+
+<Warning>
+  If you have forgotten your password, contact Mydva support. Self-service password reset is not currently available in the platform.
+</Warning>
+
+Don't have an account yet? [Create your Mydva account](/account/registration).

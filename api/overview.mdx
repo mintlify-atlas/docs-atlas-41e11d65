@@ -1,0 +1,69 @@
+---
+title: "Mydva API overview and base URLs"
+description: "Overview of Mydva's three backend APIs—FastAPI, Express, and Flask chatbot. Covers base URLs, the FastAPI response envelope, auth model, and interactive docs."
+---
+
+Mydva exposes three independent backend services, each handling a distinct domain of the platform. The FastAPI dosha engine performs AI-powered constitution analysis and generates Ayurvedic recommendations. The Express auth service manages user accounts and session tokens. The Flask chatbot service provides a conversational Ayurvedic assistant powered by Google Gemini.
+
+## Services and base URLs
+
+| Service | Base URL | Purpose |
+|---|---|---|
+| FastAPI dosha engine | `http://localhost:8000` | Dosha analysis, recommendations, personal consultation |
+| Express auth service | `http://localhost:5000` | User registration, login, JWT session management |
+| Flask chatbot | `http://localhost:5000` | AI-powered Ayurvedic conversational assistant |
+
+<Note>
+The Express auth service and Flask chatbot both default to port 5000. In a production deployment these are separated onto distinct ports or subdomains. Confirm your local configuration before making requests.
+</Note>
+
+## FastAPI response envelope
+
+All FastAPI endpoints (`/api/v1/*`) return a consistent JSON envelope regardless of outcome.
+
+```json
+{
+  "status": "success",
+  "data": { },
+  "error": null
+}
+```
+
+On failure the envelope takes the following shape:
+
+```json
+{
+  "status": "error",
+  "data": null,
+  "error": "A human-readable error message."
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `status` | `"success"` \| `"error"` | Indicates whether the request succeeded. |
+| `data` | `object` \| `null` | The response payload on success; `null` on error. |
+| `error` | `string` \| `null` | A human-readable error message on failure; `null` on success. |
+
+## Authentication
+
+The Express auth service issues a signed JWT on successful login. The token is delivered two ways:
+
+- **HTTP-only cookie** — the `token` cookie is set automatically and sent with subsequent same-origin requests. It expires after 3 days.
+- **Response body** — the raw token string is also included in the login response body under the `token` field for clients that manage tokens manually.
+
+FastAPI dosha and recommendation routes are currently open and do not require authentication. The personal consultation endpoint also requires no token, but it does require a valid `GROQ_API_KEY` to be configured in the server environment.
+
+<Warning>
+FastAPI routes have no authentication guard in the current implementation. Do not expose port 8000 publicly without adding an authentication layer.
+</Warning>
+
+## Interactive API docs
+
+The FastAPI service auto-generates a Swagger UI at:
+
+```
+http://localhost:8000/docs
+```
+
+You can explore and test all FastAPI endpoints interactively from this interface without writing any code. A ReDoc view is also available at `http://localhost:8000/redoc`.

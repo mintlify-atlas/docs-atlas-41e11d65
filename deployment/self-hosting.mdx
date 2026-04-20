@@ -1,0 +1,182 @@
+---
+title: "Self-host Mydva on your own server"
+description: "Step-by-step guide to deploying all four Mydva services—FastAPI backend, Express auth server, Flask chatbot, and React frontend—on a single server."
+---
+
+Mydva is composed of four independently running services. Each service must be started separately, and they communicate over localhost ports. This guide walks through setting up all four services on a single Linux or macOS machine, either for local development or for a self-hosted production deployment.
+
+## Services overview
+
+| Service | Technology | Default port | Purpose |
+|---|---|---|---|
+| FastAPI backend | Python / Uvicorn | `8000` | Ayurvedic consultation API and core logic |
+| Express auth server | Node.js / Express | `5000` | User registration, login, and JWT authentication |
+| Flask chatbot | Python / Flask | `5000` | Conversational chatbot powered by Google Gemini |
+| React frontend | Node.js / React | `3000` | Web interface served to users |
+
+<Warning>
+The Flask chatbot and the Express auth server both default to port `5000`. You must change one of them to a different port before starting both services. See step 5 for details.
+</Warning>
+
+## Prerequisites
+
+Before you begin, confirm the following are installed on your server:
+
+- Python 3.10 or higher
+- `pip`
+- Node.js and `npm`
+- `git`
+- An active internet connection (required for Groq API and Gemini API calls at runtime)
+
+## Deployment steps
+
+<Steps>
+  <Step title="Clone the repository and configure environment variables">
+    Clone the repository and create both `.env` files before starting any service.
+
+    ```bash
+    git clone https://github.com/GaurRitika/DVA.git
+    cd DVA
+    ```
+
+    Create `DVA/.env`:
+
+    ```env
+    GROQ_API_KEY=your_groq_api_key_here
+    REACT_APP_API_BASE_URL=http://localhost:8000/api/v1
+    ```
+
+    Create `DVA/mybackend/.env`:
+
+    ```env
+    MONGO_URI=your_mongodb_connection_string
+    PORT=5000
+    JWT_SECRET=your_jwt_secret
+    ```
+
+    See [Environment variables](/configuration/environment-variables) for the full reference.
+  </Step>
+
+  <Step title="Set up Python virtual environment and install backend dependencies">
+    Create and activate a virtual environment, then install all Python dependencies from `requirements.txt`.
+
+    <CodeGroup>
+
+    ```bash Linux / macOS
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt
+    ```
+
+    ```bash Windows
+    python -m venv venv
+    venv\Scripts\activate
+    pip install -r requirements.txt
+    ```
+
+    </CodeGroup>
+
+    <Note>
+    The virtual environment must be activated in every new terminal session before running Python services. If you see `ModuleNotFoundError`, the most likely cause is a missing or inactive virtual environment.
+    </Note>
+  </Step>
+
+  <Step title="Start the FastAPI backend (port 8000)">
+    Open a new terminal, activate the virtual environment, then start the server from the `DVA/backend/` directory:
+
+    ```bash
+    cd backend
+    uvicorn app:app --reload --host 0.0.0.0 --port 8000
+    ```
+
+    The API will be available at `http://localhost:8000`. Interactive API documentation is at `http://localhost:8000/docs`.
+
+    The `--reload` flag enables hot-reloading for development. Remove it for production.
+  </Step>
+
+  <Step title="Set up and start the Express auth server (port 5000)">
+    Open a new terminal, navigate to `mybackend/`, and install Node dependencies:
+
+    ```bash
+    cd mybackend
+    npm install
+    npm run dev
+    ```
+
+    The auth server starts on the port defined in `mybackend/.env` (default: `5000`).
+  </Step>
+
+  <Step title="Set up and start the Flask chatbot">
+    The Flask chatbot defaults to port `5000`, which conflicts with the Express auth server. Before starting it, configure it to use a different port.
+
+    Open a new terminal, navigate to `mybackend/final_bot/`, then start the chatbot on an available port:
+
+    ```bash
+    cd mybackend/final_bot
+    python main.py
+    ```
+
+    <Warning>
+    If both the auth server and the chatbot attempt to bind to port `5000`, the second one to start will fail. Set the `PORT` environment variable or update `main.py` to use a different port (for example, `5001`) in production.
+    </Warning>
+
+    <Note>
+    The chatbot uses the Google Gemini API (`gemini-1.5-flash`) with an API key currently hardcoded in `final_bot/main.py`. For production, move this key to an environment variable before deploying.
+    </Note>
+  </Step>
+
+  <Step title="Set up and start the React frontend (port 3000)">
+    Open a new terminal, navigate to the frontend directory, install dependencies, and start the development server:
+
+    ```bash
+    cd frontend-react
+    npm install
+    npm start
+    ```
+
+    The React app will open at `http://localhost:3000`. It communicates with the FastAPI backend using the URL set in `REACT_APP_API_BASE_URL`.
+
+    For a production build, run `npm run build` instead. Serve the resulting `build/` directory with a static file server such as Nginx or `serve`.
+  </Step>
+</Steps>
+
+## Access URLs
+
+Once all four services are running:
+
+| URL | Service |
+|---|---|
+| `http://localhost:3000` | React frontend |
+| `http://localhost:8000/docs` | FastAPI interactive API documentation |
+| `http://localhost:8000/api/v1` | FastAPI base API route |
+
+## Production considerations
+
+Running services with development commands (`--reload`, `npm run dev`) is not suitable for production. Use the following approaches for a stable deployment:
+
+**Python services (FastAPI and Flask)**
+
+Use `uvicorn` without `--reload` and manage the process with `systemd` or `supervisor`:
+
+```bash
+uvicorn app:app --host 0.0.0.0 --port 8000 --workers 2
+```
+
+**Node.js auth server**
+
+Use [PM2](https://pm2.keymetrics.io/) to manage the Express process:
+
+```bash
+npm install -g pm2
+pm2 start npm --name "mydva-auth" -- run start
+pm2 save
+pm2 startup
+```
+
+**React frontend**
+
+Build the static assets and serve them with Nginx or another reverse proxy instead of running the development server.
+
+<Tip>
+Use a reverse proxy such as Nginx to expose a single port (80/443) and route traffic to each backend service by path or subdomain. This avoids exposing multiple ports to the public internet and simplifies SSL termination.
+</Tip>

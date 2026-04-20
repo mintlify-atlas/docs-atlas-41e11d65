@@ -1,0 +1,78 @@
+---
+title: "Mydva: AI-powered Ayurvedic wellness platform"
+description: "Mydva blends ancient Ayurvedic wisdom with AI to deliver personalized dosha analysis, health consultations, herbal guidance, and nearby center discovery."
+---
+
+Mydva (Digital Vedic Ayurveda) is a full-stack wellness platform that bridges thousands of years of Ayurvedic tradition with cutting-edge AI. Whether you're new to Ayurveda or deepening an existing practice, Mydva provides a personalized path: discover your unique mind-body constitution (dosha), receive AI-powered health recommendations from an LLM trained on Ayurvedic principles, explore 3D herbal remedy models, and connect with nearby Ayurvedic practitioners.
+
+<CardGroup cols={2}>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Set up your account and complete your first dosha analysis in minutes.
+  </Card>
+  <Card title="Dosha Analysis" icon="circle-half-stroke" href="/features/dosha-analysis">
+    Take the interactive quiz to discover your Vata, Pitta, and Kapha constitution.
+  </Card>
+  <Card title="Personal Consultation" icon="stethoscope" href="/features/personal-consultation">
+    Get AI-powered, dosha-specific health and lifestyle recommendations.
+  </Card>
+  <Card title="API Reference" icon="code" href="/api/overview">
+    Integrate Mydva's dosha and consultation APIs into your own applications.
+  </Card>
+</CardGroup>
+
+## What Mydva offers
+
+Mydva is organized around the three pillars of Ayurvedic practice — understanding your constitution, receiving personalized guidance, and accessing Ayurvedic resources.
+
+<CardGroup cols={3}>
+  <Card title="Dosha Analysis" icon="dna">
+    An interactive questionnaire scores your Vata, Pitta, and Kapha traits to determine your primary and secondary doshas with percentage breakdowns.
+  </Card>
+  <Card title="AI Consultations" icon="brain">
+    Powered by Groq's LLaMA 3.3 70B model, the consultation engine generates detailed dietary, lifestyle, herbal, and therapeutic plans tailored to your profile.
+  </Card>
+  <Card title="Herbal Remedies" icon="seedling">
+    Explore 3D interactive models of common Ayurvedic herbs with usage guidance and traditional context.
+  </Card>
+  <Card title="Ayurvedic Centers" icon="location-dot">
+    Discover nearby Ayurvedic hospitals and clinics for in-person consultations and treatments.
+  </Card>
+  <Card title="Education Hub" icon="graduation-cap">
+    Access curated articles and video content to deepen your understanding of Ayurvedic principles and practices.
+  </Card>
+  <Card title="AI Chatbot" icon="message-bot">
+    A Gemini-powered assistant available throughout the platform to answer Ayurvedic questions in real time.
+  </Card>
+</CardGroup>
+
+## How it works
+
+<Steps>
+  <Step title="Create your account">
+    Register with your name, email, and a profile photo. Mydva uses JWT-secured sessions to keep your health data private.
+  </Step>
+  <Step title="Complete the dosha quiz">
+    Answer questions about your physical traits, diet, sleep, and temperament. The platform calculates your Vata, Pitta, and Kapha percentages and identifies your primary constitution.
+  </Step>
+  <Step title="Receive your consultation">
+    Fill in your personal health profile — age, weight, medical history, lifestyle, and health concerns. The AI consultation engine generates a structured plan covering diet, lifestyle, exercise, herbal remedies, and therapeutic treatments.
+  </Step>
+  <Step title="Explore resources">
+    Use the herbal remedy viewer, locate nearby Ayurvedic centers, and browse the education hub to complement your personalized guidance.
+  </Step>
+</Steps>
+
+## Technology stack
+
+Mydva is built on a modern, three-tier architecture:
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React, Material UI, Redux |
+| Dosha & AI backend | FastAPI (Python), Groq LLaMA 3.3 70B |
+| Auth backend | Express.js, MongoDB, JWT |
+| AI chatbot | Google Gemini 1.5 Flash (Flask) |
+
+<Note>
+  Mydva's consultation engine uses the Groq API to call LLaMA 3.3 70B. You need a valid Groq API key to enable AI-powered recommendations. See [Groq API configuration](/configuration/groq-api) for setup details.
+</Note>

@@ -1,0 +1,109 @@
+---
+title: "Personal consultation: AI-powered Ayurvedic health plan"
+description: "Submit your health profile to Mydva's AI engine and receive a structured Ayurvedic plan covering diet, lifestyle, herbal remedies, and therapeutic treatments."
+---
+
+The personal consultation feature at `/dashboard/consultation` combines your dosha profile with detailed health and lifestyle information to generate a structured, individualized Ayurvedic wellness plan. The consultation is processed by an AI model trained in context-aware reasoning, which synthesizes your inputs against traditional Ayurvedic principles to produce practical, condition-specific guidance.
+
+## How to complete the consultation form
+
+The consultation form is divided into four sections. Complete all sections before submitting — the AI uses the full picture to produce relevant, coherent recommendations.
+
+<Steps>
+  <Step title="Personal information">
+    Provide your basic biometrics:
+
+    - Age and gender
+    - Weight and height
+
+    Mydva automatically calculates your **BMI** from your weight and height. BMI is used alongside your dosha profile to contextualize dietary and lifestyle recommendations.
+  </Step>
+  <Step title="Medical history">
+    Select any current or past conditions and list any medications you are currently taking.
+
+    Recognized conditions and their Ayurvedic context are listed below. The AI builds condition-specific Ayurvedic framing into its prompt for each condition you select.
+
+    <Accordion title="Recognized medical conditions">
+      - **Diabetes** — Ayurvedic lens: Prameha; focus on Kapha and Pitta pacification, digestive fire (agni) regulation
+      - **Hypertension** — Ayurvedic lens: Raktagata Vata; emphasis on Vata and Pitta reduction, stress management
+      - **Arthritis** — Ayurvedic lens: Amavata or Sandhivata; focus on Vata pacification, ama (toxin) reduction
+      - **Digestive issues** — Ayurvedic lens: Agni imbalance; tailored to the nature of the digestive disturbance (low, variable, or excess agni)
+      - **Respiratory problems** — Ayurvedic lens: Pranavaha srotas; Kapha and Vata regulation, respiratory channel support
+      - **Skin conditions** — Ayurvedic lens: Twak vikara; Pitta pacification, blood purification
+      - **Sleep disorders** — Ayurvedic lens: Anidra; Vata and Pitta calming, nervous system nourishment
+      - **Stress and anxiety** — Ayurvedic lens: Sahasa or Manasika roga; Vata stabilization, adaptogenic support
+    </Accordion>
+  </Step>
+  <Step title="Lifestyle">
+    Describe your current daily habits:
+
+    - **Diet type** — e.g., vegetarian, vegan, omnivore
+    - **Physical activity level** — sedentary, light, moderate, or vigorous
+    - **Sleep hours** — enter a value between 4 and 12 hours per night
+    - **Stress level** — select low, medium, or high
+  </Step>
+  <Step title="Health concerns">
+    Describe what you are hoping to address:
+
+    - **Primary concerns** — free-text field for your main health goals or symptoms
+    - **Previous treatments** — any Ayurvedic or conventional treatments you have tried before
+  </Step>
+</Steps>
+
+## How the AI processes your data
+
+After you submit the form, Mydva sends your complete health profile to the consultation engine, which uses the **Groq LLaMA 3.3 70B** model (`llama-3.3-70b-versatile`) at a conservative temperature of `0.3` to ensure focused, consistent output.
+
+The model receives a structured prompt that includes:
+
+- Your dosha profile (primary dosha, secondary dosha, percentages)
+- Your biometrics and BMI
+- Your selected medical conditions, each enriched with Ayurvedic context
+- Your current medications
+- Your lifestyle inputs
+- Your stated health concerns and prior treatments
+
+The low temperature setting (0.3) means the model produces more deterministic, clinically grounded responses rather than creative or exploratory ones — appropriate for health guidance.
+
+## What you receive
+
+Your consultation result is a structured document organized into the following sections:
+
+<CardGroup cols={2}>
+  <Card title="Condition analysis" icon="stethoscope">
+    An overview of how your reported conditions interact with your dosha constitution.
+  </Card>
+  <Card title="Dosha impact analysis" icon="circle-nodes">
+    How your current lifestyle and conditions are affecting your doshic balance.
+  </Card>
+  <Card title="Dietary recommendations" icon="utensils">
+    Foods to favor and avoid, meal timing, and eating habits aligned with your dosha and conditions.
+  </Card>
+  <Card title="Lifestyle modifications" icon="sun">
+    Daily routine (dinacharya) adjustments, sleep hygiene, and habit changes.
+  </Card>
+  <Card title="Exercise recommendations" icon="person-running">
+    Types of physical activity, intensity, and duration suited to your dosha and health status.
+  </Card>
+  <Card title="Herbal remedies" icon="leaf">
+    Specific herbs with dosage, timing, and preparation instructions tailored to your profile.
+  </Card>
+  <Card title="Therapeutic treatments" icon="spa">
+    Panchakarma or other Ayurvedic therapeutic approaches relevant to your conditions.
+  </Card>
+  <Card title="Warnings and precautions" icon="triangle-exclamation">
+    Interactions to be aware of, contraindications with medications, and when to seek in-person care.
+  </Card>
+</CardGroup>
+
+<Warning>
+The personal consultation is designed to complement — not replace — the guidance of a qualified Ayurvedic practitioner or licensed medical professional. Mydva's consultation output is informational and should not be used as a substitute for professional medical diagnosis or treatment. Always discuss significant health changes with your doctor, especially if you are managing a chronic condition or taking prescription medications.
+</Warning>
+
+## Saving and revisiting your consultation
+
+Your consultation results are saved to your account. You can return to `/dashboard/consultation` to review past results or submit a new consultation if your health situation changes.
+
+<Tip>
+Update your dosha analysis before submitting a new consultation if significant time has passed or your lifestyle has changed. This ensures the AI has the most accurate constitutional context.
+</Tip>

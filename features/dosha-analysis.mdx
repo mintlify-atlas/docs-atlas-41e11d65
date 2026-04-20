@@ -1,0 +1,79 @@
+---
+title: "Dosha analysis: discover your Ayurvedic constitution"
+description: "Use Mydva's interactive dosha quiz to calculate your Vata, Pitta, and Kapha percentages and understand your unique Ayurvedic mind-body constitution."
+---
+
+In Ayurveda, every person is born with a unique combination of three biological energies called **doshas**—Vata, Pitta, and Kapha. This combination, known as your *prakriti*, shapes your physical traits, mental tendencies, digestive patterns, and susceptibility to imbalance. Understanding your dosha profile is the foundation of Ayurvedic wellness and the starting point for all personalized guidance in Mydva.
+
+## The three doshas
+
+The doshas are derived from the five elements of nature and govern different physiological and psychological functions in the body.
+
+| Dosha | Elements | Primary traits | Governs |
+|-------|----------|----------------|---------|
+| **Vata** | Air + Ether | Dry, light, cold, mobile, subtle | Movement, circulation, breathing, nerve impulses |
+| **Pitta** | Fire + Water | Hot, sharp, light, oily, liquid | Digestion, metabolism, body temperature, intellect |
+| **Kapha** | Earth + Water | Heavy, slow, cool, oily, smooth | Structure, lubrication, immunity, emotional stability |
+
+Most people have one dominant dosha (primary) and a secondary dosha that also influences their constitution.
+
+## How the dosha quiz works
+
+The quiz at `/dashboard/dosha-analysis` presents a series of questions about your body, mind, and habits. Each question maps to a physical trait or behavioral tendency and captures how closely it matches Vata, Pitta, or Kapha characteristics.
+
+Topics covered in the quiz include:
+
+- **Body traits** — frame, weight, skin texture, hair type
+- **Temperament** — how you respond to stress, decision-making style, emotional patterns
+- **Diet preferences** — appetite strength, food cravings, digestion speed
+- **Sleep patterns** — duration, quality, dreams
+
+For each answer you provide, the system records a `vata_score`, `pitta_score`, and `kapha_score` for that characteristic. These scores accumulate across all questions.
+
+## How scores are calculated
+
+After you complete all questions, the `DoshaAnalyzer` service totals your scores across all three doshas and converts them into percentages.
+
+```python
+# Simplified from backend/app/services/dosha_analyzer.py
+total = total_vata + total_pitta + total_kapha
+
+vata_percentage = (total_vata / total) * 100
+pitta_percentage = (total_pitta / total) * 100
+kapha_percentage = (total_kapha / total) * 100
+```
+
+**Primary dosha** is whichever percentage is highest.
+
+**Secondary dosha** is assigned when any of the other two doshas scores above 25%. This reflects the common Ayurvedic understanding that most people are *dual-doshic* — predominantly one dosha with meaningful influence from a second.
+
+## What your results show
+
+Once the quiz is complete, your results page displays:
+
+<CardGroup cols={2}>
+  <Card title="Percentage breakdown" icon="chart-pie">
+    A visual breakdown of your Vata, Pitta, and Kapha percentages, showing the relative weight of each dosha in your constitution.
+  </Card>
+  <Card title="Primary dosha" icon="star">
+    Your dominant dosha, with a description of its core traits and how it likely manifests in your body and mind.
+  </Card>
+  <Card title="Secondary dosha" icon="circle-half-stroke">
+    If a second dosha scores above 25%, it is identified here alongside its influence on your overall profile.
+  </Card>
+  <Card title="Initial recommendations" icon="list-check">
+    A preliminary set of lifestyle, diet, and wellness suggestions tailored to your dosha combination.
+  </Card>
+</CardGroup>
+
+<Note>
+Your dosha profile is stored in your account and automatically used as context whenever you request a personal consultation. You do not need to retake the quiz before each consultation.
+</Note>
+
+## Next steps
+
+Your dosha analysis results feed directly into the [Personal Consultation](/features/personal-consultation) feature. When you submit a consultation request, Mydva combines your dosha profile with your health history and lifestyle information to generate a comprehensive, individualized Ayurvedic health plan.
+
+<Tip>
+If your lifestyle, health, or circumstances have changed significantly, retake the quiz to update your dosha profile before your next consultation. Doshas can shift over time due to age, season, and life events.
+</Tip>
